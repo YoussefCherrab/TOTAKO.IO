@@ -5,15 +5,13 @@
 A Fast-Paced Strategy Game of Precision & Mind Games
 
 <p>
-  Outsmart your opponent. Control the board. Win the diamonds.
+Outsmart your opponent. Control the board. Win the diamonds.
 </p><p>
-  <a href="https://youssefcherrab.github.io/TOTAKO.IO/">
-    <strong>🎯 Play Now</strong>
-  </a>
-  ·
-  <a href="https://github.com/Ycherrab/TOTAKO">Source Code</a>
-  ·
-  <a href="https://github.com/Ycherrab/TOTAKO/issues">Issues</a>
+<a href="https://youssefcherrab.github.io/TOTAKO.IO/"><strong>🎯 Play Now</strong></a>
+·
+<a href="https://github.com/Ycherrab/TOTAKO">Source Code</a>
+·
+<a href="https://github.com/Ycherrab/TOTAKO/issues">Issues</a>
 </p><img src="https://img.shields.io/badge/status-active-success">
 <img src="https://img.shields.io/badge/license-MIT-green">
 <img src="https://img.shields.io/badge/made%20with-JS-yellow">
@@ -27,7 +25,7 @@ A Fast-Paced Strategy Game of Precision & Mind Games
 
 💎 What is TOTAKO?
 
-TOTAKO is a modern browser-based strategy game inspired by classics like Dots and Boxes, but redesigned for speed, tension, and tactical depth.
+TOTAKO is a modern browser-based strategy game inspired by classics like Dots and Boxes, redesigned for speed, tension, and tactical depth.
 
 Unlike traditional versions, every move matters — there are no bonus turns, no second chances.
 
@@ -38,19 +36,10 @@ You must think ahead, trap your opponent, and control the flow of the game.
 ⚡ Why This Game is Different
 
 - 🧠 No Extra Turns Rule
-  Forces real strategy instead of simple chaining
-
 - ⏱️ 5-Second Timer
-  Every move is under pressure
-
 - 🤖 Smart AI Opponent
-  Designed to challenge your decisions
-
-- 👥 Local Multiplayer
-  2–4 players on one device
-
+- 👥 Local Multiplayer (2–4 players)
 - 🎯 Instant Play
-  No install. No login. Just open and play
 
 ---
 
@@ -67,7 +56,6 @@ You must think ahead, trap your opponent, and control the flow of the game.
 - Click a line between two points
 - Complete a diamond to claim it
 - No extra turns — plan carefully
-- Game ends when all edges are filled
 - Player with most diamonds wins 🏆
 
 💡 Pro Tip:
@@ -109,7 +97,7 @@ index.html
 
 🧠 Vision
 
-TOTAKO is more than a game — it's a strategic experience built to be:
+TOTAKO is a strategic experience built to be:
 
 - simple to learn
 - hard to master
@@ -119,11 +107,9 @@ TOTAKO is more than a game — it's a strategic experience built to be:
 
 🤝 Contributing
 
-Want to improve the game?
-
 - Fork the repo
-- Make your changes
-- Submit a Pull Request
+- Make changes
+- Open Pull Request
 
 ---
 
@@ -145,6 +131,5 @@ Youssef Cherrab
 ⭐ Support
 
 If you like the project, drop a star ⭐
-It helps the project grow 🚀
 
 ---
