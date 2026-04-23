@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TOTAKO — Diamond Challenge</title>
+<meta name="description" content="TOTAKO Diamond Challenge — a strategic line-capturing game. Play vs Gemini AI or with Friends!">
+<meta name="theme-color" content="#6366f1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TOTAKO">
+<meta name="keywords" content="TOTAKO, diamond challenge, dots and boxes, strategy game, online game">
+<meta name="author" content="Youssef Cherrab">
+<meta property="og:title" content="TOTAKO — Diamond Challenge">
+<meta property="og:description" content="Strategic line-capturing game. Play vs AI or with Friends!">
+<meta property="og:type" content="website">
+<link rel="manifest" id="pwa-manifest">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0a0a0f;
+  --surface:#13131a;
+  --surface2:#1a1a24;
+  --border:#2a2a3a;
+  --text:#e8e8f0;
+  --muted:#7070a0;
+  --accent:#6366f1;
+  --accent-light:#818cf8;
+  --gold:#f59e0b;
+  --gold-light:#fbbf24;
+  --green:#10b981;
+  --red:#ef4444;
+  --blue:#3b82f6;
+  --yellow:#eab308;
+  --p1:#ef4444;
+  --p2:#10b981;
+  --p3:#3b82f6;
+  --p4:#f59e0b;
+}
+html,body{height:100%;overscroll-behavior:none;}
+body{
+  font-family:'Space Grotesk',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  font-size:15px;
+  line-height:1.5;
+}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.topnav{
+  position:sticky;top:0;z-index:500;
+  background:rgba(10,10,15,.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;height:52px;
+}
+.nav-logo{
+  font-family:'Space Mono',monospace;
+  font-size:18px;font-weight:700;
+  color:var(--gold);
+  cursor:pointer;letter-spacing:2px;
+}
+.nav-links{display:flex;gap:4px;align-items:center;}
+.nav-link{
+  padding:6px 12px;border-radius:8px;
+  font-size:13px;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:.2s;border:none;background:none;
+  font-family:'Space Grotesk',sans-serif;
+}
+.nav-link:hover{color:var(--text);background:var(--surface2);}
+.nav-link.active{color:var(--text);}
+.nav-menu-btn{
+  display:none;padding:8px;border-radius:8px;
+  background:none;border:1px solid var(--border);
+  color:var(--text);cursor:pointer;font-size:18px;
+}
+@media(max-width:600px){
+  .nav-links{display:none;position:absolute;top:52px;left:0;right:0;flex-direction:column;background:var(--surface);border-bottom:1px solid var(--border);padding:8px;gap:2px;z-index:999;}
+  .nav-links.open{display:flex;}
+  .nav-link{padding:10px 14px;border-radius:8px;}
+  .nav-menu-btn{display:flex;}
+}
+
+.ad-strip{width:100%;max-width:728px;margin:0 auto;padding:8px 16px;}
+.ad-box{
+  background:var(--surface);border:1px dashed var(--border);
+  border-radius:10px;padding:8px 16px;min-height:60px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:12px;font-family:'Space Mono',monospace;letter-spacing:1px;
+}
+.ad-label{background:var(--accent);color:#fff;padding:2px 7px;border-radius:4px;font-size:10px;margin-right:8px;font-weight:700;}
+
+.page{display:none;flex-direction:column;align-items:center;width:100%;min-height:calc(100vh - 52px);}
+.page.on{display:flex;}
+
+.game-wrap{width:100%;max-width:520px;margin:0 auto;padding:12px 12px 80px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+
+.score-bar{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:10px 14px;gap:10px;
+}
+.score-item{text-align:center;min-width:52px;}
+.score-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.score-value{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);}
+.score-divider{width:1px;height:32px;background:var(--border);}
+
+.timer-bar-wrap{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;height:6px;
+}
+.timer-bar{
+  height:100%;width:100%;
+  background:linear-gradient(90deg,var(--green),var(--gold));
+  transition:width .1s linear,background .5s;border-radius:10px;
+}
+.timer-bar.warn{background:linear-gradient(90deg,var(--gold),var(--red));}
+.timer-bar.urgent{background:var(--red);animation:timerPulse .3s ease-in-out infinite;}
+@keyframes timerPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+.turn-ind{
+  width:100%;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:9px 14px;font-size:14px;font-weight:600;
+}
+.turn-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.turn-name{flex:1;}
+.turn-timer{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--gold);}
+
+.board-wrap{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:16px;
+  display:flex;justify-content:center;align-items:center;
+  position:relative;overflow:hidden;
+}
+.board-inner{position:relative;flex-shrink:0;}
+.dots-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+.edges-layer{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;}
+.pieces-layer{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;pointer-events:none;z-index:3;}
+.piece-cell{display:flex;align-items:center;justify-content:center;}
+.piece-svg{width:75%;height:75%;animation:pieceIn .25s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pieceIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.edge{position:absolute;transition:.12s;}
+.edge-outer{background:var(--surface2);border-radius:2px;border:1px solid var(--border);pointer-events:none;}
+.edge-inner{
+  background:#2a2a40;cursor:pointer;pointer-events:auto;
+  border-radius:4px;border:1px solid #3a3a55;
+  transition:background .12s,box-shadow .12s,transform .08s;z-index:10;
+}
+.edge-inner::after{
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:max(100%,44px);height:max(100%,44px);min-width:44px;min-height:44px;
+  border-radius:6px;background:transparent;z-index:20;
+}
+.edge-inner:hover:not(.taken){
+  background:#4a4a70;border-color:#6a6a90;
+  box-shadow:0 0 8px rgba(99,102,241,.4);transform:scale(1.15);
+}
+.edge-inner:active:not(.taken){transform:scale(.9);}
+.edge-inner.taken{pointer-events:none;}
+.edge-inner.ai-thinking{animation:aiGlow .5s ease-in-out 3;}
+@keyframes aiGlow{
+  0%,100%{background:#2a2a40;}
+  50%{background:#3a3060;border-color:#6366f1;box-shadow:0 0 12px rgba(99,102,241,.6);}
+}
+
+.players-panel{width:100%;display:flex;gap:8px;flex-wrap:wrap;}
+.player-card{
+  flex:1;min-width:80px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.player-card.active{border-color:currentColor;box-shadow:0 0 0 1px currentColor inset;}
+.player-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.player-name{font-size:12px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-score{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;}
+
+.game-ctrl{display:flex;gap:8px;width:100%;justify-content:center;}
+.g-btn{
+  padding:9px 18px;border-radius:10px;background:var(--surface);border:1px solid var(--border);
+  color:var(--text);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;
+  font-family:'Space Grotesk',sans-serif;
+}
+.g-btn:hover{background:var(--surface2);border-color:var(--accent);}
+.g-btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;}
+.g-btn.pri:hover{background:var(--accent-light);}
+
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,15,.97);
+  backdrop-filter:blur(20px);border-top:1px solid var(--border);
+  display:flex;z-index:400;height:58px;
+}
+.bnav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border:none;background:none;color:var(--muted);cursor:pointer;transition:.2s;padding:4px;
+  font-family:'Space Grotesk',sans-serif;
+}
+.bnav-btn.on{color:var(--text);}
+.bnav-btn .b-icon{font-size:20px;}
+.bnav-btn .b-label{font-size:10px;font-weight:600;letter-spacing:.5px;}
+
+.setup-wrap{width:100%;max-width:420px;margin:0 auto;padding:20px 16px 80px;}
+.setup-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px;}
+.setup-title{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--gold);margin-bottom:16px;text-transform:uppercase;letter-spacing:1px;}
+.option-row{display:flex;gap:8px;flex-wrap:wrap;}
+.opt-btn{
+  flex:1;padding:10px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);
+  color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;transition:.2s;min-width:60px;text-align:center;
+  font-family:'Space Grotesk',sans-serif;
+}
+.opt-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.player-setup-list{display:flex;flex-direction:column;gap:8px;}
+.ps-row{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;
+  background:var(--surface2);border:1px solid var(--border);
+}
+.ps-dot{width:12px;height:12px;border-radius:50%;}
+.ps-name{flex:1;font-weight:600;}
+.btn-start{
+  width:100%;padding:15px;border-radius:12px;background:var(--accent);border:none;
+  color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;
+  font-family:'Space Mono',monospace;letter-spacing:2px;
+}
+.btn-start:hover{background:var(--accent-light);}
+
+.static-wrap{width:100%;max-width:680px;margin:0 auto;padding:32px 20px 100px;}
+.static-hero{text-align:center;margin-bottom:40px;}
+.static-hero h1{font-family:'Space Mono',monospace;font-size:clamp(24px,6vw,40px);font-weight:700;color:var(--gold);margin-bottom:8px;}
+.static-hero p{color:var(--muted);font-size:15px;}
+.static-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;}
+.static-section h2{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--accent-light);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;}
+.static-section p,.static-section li{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:8px;}
+.static-section ul,.static-section ol{padding-left:20px;}
+.static-section li{margin-bottom:6px;}
+.static-section a{color:var(--accent-light);text-decoration:none;}
+.static-section a:hover{text-decoration:underline;}
+.rule-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.rule-step:last-child{border-bottom:none;}
+.rule-num{
+  width:28px;height:28px;border-radius:8px;background:var(--accent);color:#fff;
+  font-family:'Space Mono',monospace;font-size:13px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.rule-text{font-size:14px;color:var(--muted);padding-top:4px;}
+.contact-form{display:flex;flex-direction:column;gap:12px;}
+.cf-input{
+  padding:12px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);font-size:14px;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .2s;
+}
+.cf-input:focus{border-color:var(--accent);}
+.cf-textarea{resize:vertical;min-height:100px;}
+.cf-btn{
+  padding:12px;border-radius:10px;background:var(--accent);border:none;
+  color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;
+  font-family:'Space Grotesk',sans-serif;
+}
+.cf-btn:hover{background:var(--accent-light);}
+
+.modal-bg{
+  position:fixed;inset:0;background:rgba(5,5,10,.9);backdrop-filter:blur(16px);
+  z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;
+}
+.modal-bg.show{display:flex;}
+.win-modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:28px 24px;text-align:center;max-width:340px;width:100%;
+  animation:pieceIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+.win-icon{font-size:48px;margin-bottom:12px;}
+.win-title{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.win-sub{font-size:14px;color:var(--muted);margin-bottom:20px;}
+.win-scores{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;}
+.win-score-card{background:var(--surface2);border-radius:10px;padding:12px;border:1px solid var(--border);}
+.win-score-name{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.win-score-val{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;}
+.win-btns{display:flex;gap:8px;}
+.win-btn{
+  flex:1;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);
+  color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:.2s;
+  font-family:'Space Grotesk',sans-serif;
+}
+.win-btn:hover{background:var(--border);}
+.win-btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;}
+.win-btn.pri:hover{background:var(--accent-light);}
+
+#pc-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:999;}
+
+.ai-status{
+  width:100%;padding:8px 14px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px;min-height:36px;
+}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:aiPing .8s ease-in-out infinite;}
+@keyframes aiPing{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+.ai-status.idle .ai-dot{animation:none;background:var(--border);}
+
+.site-footer{width:100%;border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);}
+.site-footer a{color:var(--muted);text-decoration:none;}
+.site-footer a:hover{color:var(--text);}
+
+#pwa-banner{
+  position:fixed;bottom:66px;left:50%;transform:translateX(-50%);z-index:600;
+  display:none;align-items:center;gap:10px;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:10px 14px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);max-width:320px;width:calc(100% - 24px);
+}
+#pwa-banner.show{display:flex;}
+#pwa-banner .pwa-text{flex:1;font-size:12px;line-height:1.4;}
+#pwa-banner .pwa-text strong{color:var(--gold);display:block;font-family:'Space Mono',monospace;font-size:11px;}
+#pwa-install-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Space Grotesk',sans-serif;}
+#pwa-dismiss-btn{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px;}
+</style>
+</head>
+<body>
+
+<canvas id="pc-canvas"></canvas>
+
+<nav class="topnav">
+  <div class="nav-logo" onclick="showPage('game')">TOTAKO</div>
+  <div class="nav-links" id="nav-links">
+    <button class="nav-link" onclick="showPage('about')">About</button>
+    <button class="nav-link" onclick="showPage('how-to-play')">How to Play</button>
+    <button class="nav-link" onclick="showPage('privacy')">Privacy</button>
+    <button class="nav-link" onclick="showPage('contact')">Contact</button>
+  </div>
+  <button class="nav-menu-btn" id="nav-menu-btn" onclick="toggleMenu()">☰</button>
+</nav>
+
+<div id="pwa-banner">
+  <div class="pwa-text"><strong>INSTALL TOTAKO</strong>Play offline anytime!</div>
+  <button id="pwa-install-btn">INSTALL</button>
+  <button id="pwa-dismiss-btn">✕</button>
+</div>
+
+<div class="modal-bg" id="win-modal">
+  <div class="win-modal">
+    <div class="win-icon" id="win-icon">🏆</div>
+    <div class="win-title" id="win-title">Game Over!</div>
+    <div class="win-sub" id="win-sub">Final Scores</div>
+    <div class="win-scores" id="win-scores"></div>
+    <div class="win-btns">
+      <button class="win-btn" onclick="closeWin()">✕ Close</button>
+      <button class="win-btn pri" id="win-retry-btn">↻ Retry</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ GAME PAGE ═══════════════════ -->
+<div class="page on" id="page-game">
+  <div class="ad-strip"><div class="ad-box"><span class="ad-label">Ad</span>Advertisement — 728×90</div></div>
+
+  <div style="width:100%;max-width:520px;margin:8px auto 0;padding:0 12px;">
+    <div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <button class="bnav-btn on" id="tab-ai" onclick="setMode('ai')" style="flex:1;flex-direction:row;gap:8px;height:44px;border-radius:0;">
+        <span class="b-icon" style="font-size:18px;">🤖</span>
+        <span style="font-size:13px;font-weight:600;">VS AI</span>
+      </button>
+      <button class="bnav-btn" id="tab-fr" onclick="setMode('fr')" style="flex:1;flex-direction:row;gap:8px;height:44px;border-radius:0;">
+        <span class="b-icon" style="font-size:18px;">👥</span>
+        <span style="font-size:13px;font-weight:600;">VS Friends</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- AI SECTION -->
+  <div id="ai-section" class="game-wrap">
+    <div class="score-bar">
+      <div class="score-item"><div class="score-label">AI</div><div class="score-value" id="ai-score-ai" style="color:var(--red);">0</div></div>
+      <div class="score-divider"></div>
+      <div class="score-item"><div class="score-label">Cells</div><div class="score-value" id="ai-cells-left" style="color:var(--muted);">-</div></div>
+      <div class="score-divider"></div>
+      <div class="score-item"><div class="score-label">You</div><div class="score-value" id="ai-score-you" style="color:var(--green);">0</div></div>
+    </div>
+
+    <div class="turn-ind">
+      <div class="turn-dot" id="ai-turn-dot" style="background:var(--red);"></div>
+      <span class="turn-name" id="ai-turn-name">AI's Turn</span>
+      <span class="turn-timer" id="ai-turn-timer">5s</span>
+    </div>
+    <div class="timer-bar-wrap"><div class="timer-bar" id="ai-timer-bar"></div></div>
+
+    <div class="board-wrap">
+      <div class="board-inner" id="ai-board-inner">
+        <div class="edges-layer" id="ai-edges"></div>
+        <div class="pieces-layer" id="ai-pieces"></div>
+      </div>
+    </div>
+
+    <div class="ai-status idle" id="ai-status">
+      <div class="ai-dot"></div>
+      <span id="ai-status-text">Waiting for your move...</span>
+    </div>
+
+    <div class="game-ctrl">
+      <button class="g-btn" onclick="aiNewGame()">↻ New Game</button>
+    </div>
+  </div>
+
+  <!-- FRIENDS SECTION -->
+  <div id="fr-section" style="display:none;width:100%;">
+    <div id="fr-setup" class="setup-wrap">
+      <div class="setup-card">
+        <div class="setup-title">👥 Number of Players</div>
+        <div class="option-row">
+          <button class="opt-btn" onclick="frSetPC(2)">2</button>
+          <button class="opt-btn" onclick="frSetPC(3)">3</button>
+          <button class="opt-btn on" onclick="frSetPC(4)">4</button>
+        </div>
+      </div>
+      <div class="setup-card">
+        <div class="setup-title">🎭 Players</div>
+        <div class="player-setup-list" id="fr-player-list"></div>
+      </div>
+      <div class="setup-card">
+        <div class="setup-title">⏱ Turn Timer</div>
+        <div class="option-row">
+          <button class="opt-btn on" id="timer-off-btn" onclick="frSetTimer(false)">No Timer</button>
+          <button class="opt-btn" id="timer-on-btn" onclick="frSetTimer(true)">5s Timer</button>
+        </div>
+      </div>
+      <button class="btn-start" onclick="frStart()">▶ START GAME</button>
+    </div>
+
+    <div id="fr-game" class="game-wrap" style="display:none;">
+      <div class="turn-ind">
+        <div class="turn-dot" id="fr-turn-dot"></div>
+        <span class="turn-name" id="fr-turn-name">Player 1</span>
+        <span class="turn-timer" id="fr-turn-timer" style="display:none;">5s</span>
+      </div>
+      <div class="timer-bar-wrap" id="fr-timer-wrap" style="display:none;"><div class="timer-bar" id="fr-timer-bar"></div></div>
+
+      <div class="board-wrap">
+        <div class="board-inner" id="fr-board-inner">
+          <div class="edges-layer" id="fr-edges"></div>
+          <div class="pieces-layer" id="fr-pieces"></div>
+        </div>
+      </div>
+
+      <div class="players-panel" id="fr-players-panel"></div>
+
+      <div class="game-ctrl">
+        <button class="g-btn" onclick="frNewRound()">↻ New Round</button>
+        <button class="g-btn" onclick="frBackSetup()">⚙ Settings</button>
+      </div>
+
+      <div class="ad-strip" style="padding:0;width:100%;"><div class="ad-box" style="min-height:48px;"><span class="ad-label">Ad</span>Advertisement</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HOW TO PLAY ═══════════════════ -->
+<div class="page" id="page-how-to-play">
+  <div class="static-wrap">
+    <div class="static-hero">
+      <h1>How to Play</h1>
+      <p>Master the Diamond Challenge in minutes</p>
+    </div>
+    <div class="static-section">
+      <h2>Game Rules</h2>
+      <div class="rule-step"><div class="rule-num">1</div><div class="rule-text">Players take turns clicking on lines between diamond cells on the board.</div></div>
+      <div class="rule-step"><div class="rule-num">2</div><div class="rule-text">When you complete all edges around a diamond cell, you capture it — your symbol appears inside.</div></div>
+      <div class="rule-step"><div class="rule-num">3</div><div class="rule-text">If you capture a cell, you <strong style="color:var(--gold);">do NOT</strong> get an extra turn (unlike classic Dots &amp; Boxes).</div></div>
+      <div class="rule-step"><div class="rule-num">4</div><div class="rule-text">The player with the most captured cells when all edges are taken <strong style="color:var(--gold);">wins!</strong></div></div>
+    </div>
+    <div class="static-section">
+      <h2>⏱ Turn Timer</h2>
+      <p>Each player (and the AI) has 5 seconds per turn. If time runs out, the turn passes automatically to the next player — no random move is placed. Stay focused!</p>
+    </div>
+    <div class="static-section">
+      <h2>🤖 Gemini AI Opponent</h2>
+      <p>The AI opponent is powered by Google's Gemini AI and thinks about the best strategic moves. The AI also has a 5-second timer — if it doesn't respond in time, its turn is skipped and you play again.</p>
+    </div>
+    <div class="static-section">
+      <h2>Strategy Tips</h2>
+      <ul>
+        <li>Avoid completing 3 edges of a cell — your opponent can finish it next turn.</li>
+        <li>Look for chains of cells where completing one leads to capturing many.</li>
+        <li>Control the corners and edges first to create favorable chain opportunities.</li>
+        <li>Sacrifice a few cells to break an opponent's chain.</li>
+      </ul>
+    </div>
+    <button class="btn-start" style="max-width:300px;margin:0 auto;display:block;" onclick="showPage('game')">▶ Play Now</button>
+  </div>
+  <footer class="site-footer"><p>TOTAKO © 2025 — Youssef Cherrab | <a onclick="showPage('privacy')">Privacy Policy</a></p></footer>
+</div>
+
+<!-- ═══════════════════ ABOUT ═══════════════════ -->
+<div class="page" id="page-about">
+  <div class="static-wrap">
+    <div class="static-hero">
+      <h1>About TOTAKO</h1>
+      <p>A strategic diamond-grid game</p>
+    </div>
+    <div class="static-section">
+      <h2>What is TOTAKO?</h2>
+      <p>TOTAKO — Diamond Challenge is a free, browser-based strategic board game inspired by the classic "Dots and Boxes" concept, reimagined on a unique diamond-shaped grid.</p>
+      <p>Play against a Gemini AI opponent or challenge 2–4 friends on the same device. The game is designed to be fast, fun, and strategically deep.</p>
+    </div>
+    <div class="static-section">
+      <h2>Features</h2>
+      <ul>
+        <li>🤖 AI opponent powered by Google Gemini</li>
+        <li>👥 Local multiplayer for 2–4 players</li>
+        <li>⏱ 5-second turn timer for both player and AI</li>
+        <li>📱 Mobile-friendly, installable as PWA</li>
+        <li>🎮 No account needed — play instantly</li>
+      </ul>
+    </div>
+    <div class="static-section">
+      <h2>Creator</h2>
+      <p>TOTAKO was created by <strong style="color:var(--text);">Youssef Cherrab</strong> as a passion project to bring strategic board gaming to the browser with a modern, clean interface.</p>
+      <p>Have feedback or ideas? <a onclick="showPage('contact')" style="cursor:pointer;">Contact us!</a></p>
+    </div>
+    <div class="static-section">
+      <h2>Technology</h2>
+      <p>Built with pure HTML, CSS, and JavaScript — no frameworks, no dependencies beyond fonts and the Gemini AI API. Runs fully in your browser and can be installed as a Progressive Web App (PWA).</p>
+    </div>
+  </div>
+  <footer class="site-footer"><p>TOTAKO © 2025 — Youssef Cherrab | <a onclick="showPage('privacy')">Privacy Policy</a></p></footer>
+</div>
+
+<!-- ═══════════════════ PRIVACY ═══════════════════ -->
+<div class="page" id="page-privacy">
+  <div class="static-wrap">
+    <div class="static-hero">
+      <h1>Privacy Policy</h1>
+      <p>Last updated: May 2025</p>
+    </div>
+    <div class="static-section">
+      <h2>Overview</h2>
+      <p>TOTAKO ("we," "us," or "our") operates the TOTAKO Diamond Challenge website and game. This Privacy Policy explains how we handle information in connection with your use of our service.</p>
+    </div>
+    <div class="static-section">
+      <h2>Information We Collect</h2>
+      <p><strong style="color:var(--text);">Game Data:</strong> TOTAKO stores your best scores locally in your browser's localStorage. This data never leaves your device and is not transmitted to our servers.</p>
+      <p><strong style="color:var(--text);">AI Moves:</strong> When you play against the Gemini AI, the current board state (an abstract grid description) is sent to Google's Gemini API to generate AI moves. No personal information is included in these requests.</p>
+      <p><strong style="color:var(--text);">No Account Required:</strong> We do not require registration, collect email addresses, or store any personally identifiable information.</p>
+    </div>
+    <div class="static-section">
+      <h2>Third-Party Services</h2>
+      <p><strong style="color:var(--text);">Google Gemini API:</strong> AI gameplay uses the Gemini API. Board state data (not personal data) is sent to Google's servers. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a> for details.</p>
+      <p><strong style="color:var(--text);">Google Fonts:</strong> We load fonts from Google's CDN. Google may collect usage data per their privacy policy.</p>
+      <p><strong style="color:var(--text);">Advertising:</strong> We may display advertisements. Third-party advertisers may use cookies to serve relevant ads. We do not control these cookies.</p>
+    </div>
+    <div class="static-section">
+      <h2>Cookies &amp; Local Storage</h2>
+      <p>We use browser localStorage to save your game scores. We do not use tracking cookies ourselves. Third-party advertisement networks may set their own cookies.</p>
+    </div>
+    <div class="static-section">
+      <h2>Children's Privacy</h2>
+      <p>TOTAKO is intended for general audiences. We do not knowingly collect personal information from children under 13.</p>
+    </div>
+    <div class="static-section">
+      <h2>Contact</h2>
+      <p>Questions about this Privacy Policy? <a onclick="showPage('contact')" style="cursor:pointer;">Contact us here.</a></p>
+    </div>
+  </div>
+  <footer class="site-footer"><p>TOTAKO © 2025 — Youssef Cherrab</p></footer>
+</div>
+
+<!-- ═══════════════════ CONTACT ═══════════════════ -->
+<div class="page" id="page-contact">
+  <div class="static-wrap">
+    <div class="static-hero">
+      <h1>Contact Us</h1>
+      <p>Feedback, bugs, or ideas — we'd love to hear from you!</p>
+    </div>
+    <div class="static-section">
+      <h2>Send a Message</h2>
+      <div class="contact-form">
+        <input class="cf-input" type="text" placeholder="Your Name" id="cf-name">
+        <input class="cf-input" type="email" placeholder="Email Address" id="cf-email">
+        <select class="cf-input" id="cf-subject">
+          <option value="">Select Subject</option>
+          <option>Bug Report</option>
+          <option>Feature Request</option>
+          <option>General Feedback</option>
+          <option>Privacy Concern</option>
+          <option>Other</option>
+        </select>
+        <textarea class="cf-input cf-textarea" placeholder="Your message..." id="cf-message"></textarea>
+        <button class="cf-btn" onclick="submitContact()">Send Message</button>
+        <div id="cf-success" style="display:none;color:var(--green);font-size:14px;text-align:center;padding:8px;">✓ Message sent! We'll get back to you soon.</div>
+      </div>
+    </div>
+    <div class="static-section">
+      <h2>Other Ways to Reach Us</h2>
+      <p>📧 Email: <a href="mailto:Ycherrab@outlook.com">Ycherrab@outlook.com</a></p>
+      <p>🐛 Found a bug? Please include your device, browser, and steps to reproduce.</p>
+      <p>💡 Have a feature idea? We read every suggestion!</p>
+    </div>
+  </div>
+  <footer class="site-footer"><p>TOTAKO © 2025 — Youssef Cherrab | <a onclick="showPage('privacy')">Privacy Policy</a></p></footer>
+</div>
+
+<script>
+"use strict";
+
+const GS=7;
+const DIAMOND=[
+  [0,0,0,1,0,0,0],
+  [0,0,1,1,1,0,0],
+  [0,1,1,1,1,1,0],
+  [1,1,1,1,1,1,1],
+  [0,1,1,1,1,1,0],
+  [0,0,1,1,1,0,0],
+  [0,0,0,1,0,0,0]
+];
+
+/* ─ Particles ─ */
+const pcv=document.getElementById('pc-canvas');
+const pctx=pcv.getContext('2d');
+let PPS=[];
+function resizePC(){pcv.width=innerWidth;pcv.height=innerHeight;}
+window.addEventListener('resize',resizePC);resizePC();
+function burst(x,y,col,n=18){
+  for(let i=0;i<n;i++){
+    const a=(Math.PI*2/n)*i+Math.random()*.4,sp=Math.random()*5+2;
+    PPS.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1,life:1,d:Math.random()*.03+.02,sz:Math.random()*5+2,col});
+  }
+}
+(function drawPC(){
+  pctx.clearRect(0,0,pcv.width,pcv.height);
+  PPS=PPS.filter(p=>p.life>.01);
+  PPS.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=.1;p.life-=p.d;
+    pctx.save();pctx.globalAlpha=Math.max(0,p.life);pctx.fillStyle=p.col;
+    pctx.shadowColor=p.col;pctx.shadowBlur=6;
+    pctx.beginPath();pctx.arc(p.x,p.y,Math.max(.1,p.sz*p.life),0,Math.PI*2);pctx.fill();pctx.restore();
+  });
+  requestAnimationFrame(drawPC);
+})();
+
+/* ─ PWA ─ */
+(function(){
+  const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1040"/>
+      <stop offset="50%" stop-color="#0d0825"/>
+      <stop offset="100%" stop-color="#0a0a18"/>
+    </linearGradient>
+    <linearGradient id="diaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="30%" stop-color="#f59e0b"/>
+      <stop offset="70%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="diaGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="innerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="50%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="specGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle background pattern -->
+  <g opacity="0.05">
+    <line x1="0" y1="128" x2="512" y2="128" stroke="#6366f1" stroke-width="1"/>
+    <line x1="0" y1="256" x2="512" y2="256" stroke="#6366f1" stroke-width="1"/>
+    <line x1="0" y1="384" x2="512" y2="384" stroke="#6366f1" stroke-width="1"/>
+    <line x1="128" y1="0" x2="128" y2="512" stroke="#6366f1" stroke-width="1"/>
+    <line x1="256" y1="0" x2="256" y2="512" stroke="#6366f1" stroke-width="1"/>
+    <line x1="384" y1="0" x2="384" y2="512" stroke="#6366f1" stroke-width="1"/>
+  </g>
+
+  <!-- Outer glow ring -->
+  <circle cx="256" cy="230" r="130" fill="none" stroke="#818cf8" stroke-width="2" opacity="0.3" filter="url(#softGlow)"/>
+
+  <!-- Main diamond shape -->
+  <g filter="url(#glow)">
+    <polygon points="256,60 420,230 256,400 92,230" 
+             fill="url(#diaGrad)" 
+             stroke="url(#diaGlow)" 
+             stroke-width="8"
+             stroke-linejoin="round"/>
+  </g>
+
+  <!-- Inner diamond (3D effect) -->
+  <polygon points="256,100 380,230 256,360 132,230" 
+           fill="none" 
+           stroke="url(#innerGrad)" 
+           stroke-width="3"
+           stroke-linejoin="round"
+           opacity="0.6"/>
+
+  <!-- Central "T" letter -->
+  <text x="256" y="268" 
+        font-family="'Space Mono','Courier New',monospace" 
+        font-size="140" 
+        font-weight="900" 
+        fill="url(#innerGrad)" 
+        text-anchor="middle"
+        filter="url(#glow)"
+        letter-spacing="-4">T</text>
+
+  <!-- Specular highlight (glass effect) -->
+  <polygon points="256,78 340,190 256,180 230,140" 
+           fill="url(#specGrad)" 
+           opacity="0.4"/>
+
+  <!-- Bottom small decorative triangles -->
+  <g opacity="0.4">
+    <polygon points="256,380 290,400 256,420" fill="#fbbf24"/>
+    <polygon points="256,380 222,400 256,420" fill="#f59e0b"/>
+  </g>
+
+  <!-- Corner accents -->
+  <g opacity="0.3">
+    <circle cx="100" cy="230" r="4" fill="#818cf8"/>
+    <circle cx="412" cy="230" r="4" fill="#818cf8"/>
+    <circle cx="256" cy="70" r="4" fill="#fbbf24"/>
+    <circle cx="256" cy="410" r="4" fill="#fbbf24"/>
+  </g>
+</svg>`;
+
+  const m={
+    name:"TOTAKO — Diamond Challenge",
+    short_name:"TOTAKO",
+    start_url:"./",
+    display:"standalone",
+    background_color:"#0a0a0f",
+    theme_color:"#6366f1",
+    orientation:"portrait",
+    icons:[{
+      src:"data:image/svg+xml;base64,"+btoa(iconSVG),
+      sizes:"512x512",
+      type:"image/svg+xml",
+      purpose:"any maskable"
+    }]
+  };
+  const b=new Blob([JSON.stringify(m)],{type:"application/manifest+json"});
+  document.getElementById('pwa-manifest').href=URL.createObjectURL(b);
+  let dp=null;
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;document.getElementById('pwa-banner').classList.add('show');});
+  document.getElementById('pwa-install-btn').onclick=async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;document.getElementById('pwa-banner').classList.remove('show');};
+  document.getElementById('pwa-dismiss-btn').onclick=()=>document.getElementById('pwa-banner').classList.remove('show');
+})();
+
+/* ─ Nav ─ */
+function toggleMenu(){document.getElementById('nav-links').classList.toggle('open');}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  document.getElementById('nav-links').classList.remove('open');
+  window.scrollTo(0,0);
+}
+
+/* ─ Contact ─ */
+function submitContact(){
+  const n=document.getElementById('cf-name').value.trim();
+  const e=document.getElementById('cf-email').value.trim();
+  const s=document.getElementById('cf-subject').value;
+  const m=document.getElementById('cf-message').value.trim();
+  if(!n||!e||!m){alert('Please fill all fields.');return;}
+  
+  fetch('https://formspree.io/f/mojyyaav', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: n,
+      email: e,
+      subject: s,
+      message: m,
+      _replyto: e,
+      _subject: `New TOTAKO Contact: ${s || 'Message'} from ${n}`
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      document.getElementById('cf-success').style.display='block';
+      document.getElementById('cf-name').value='';
+      document.getElementById('cf-email').value='';
+      document.getElementById('cf-subject').value='';
+      document.getElementById('cf-message').value='';
+      setTimeout(()=>document.getElementById('cf-success').style.display='none',4000);
+    } else {
+      alert('Failed to send message. Please try again or email directly to Ycherrab@outlook.com');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Network error. Please check your connection or email directly to Ycherrab@outlook.com');
+  });
+}
+
+/* ═══════════════════ BOARD ENGINE ═══════════════════ */
+function buildBoardData(mat,gs){
+  const cn=Array.from({length:gs},()=>Array(gs).fill(0));let cc=1;
+  for(let r=0;r<gs;r++)for(let c=0;c<gs;c++)if(mat[r][c]===1)cn[r][c]=cc++;
+  const ekid={};let ec=0;const vis=new Set();
+  for(let r=0;r<gs;r++)for(let c=0;c<gs;c++){
+    if(mat[r][c]!==1)continue;
+    if(r>0&&mat[r-1][c]===1){const k=`h-${r}-${c}`;if(!vis.has(k)){vis.add(k);ekid[k]=ec++;}}
+    if(c>0&&mat[r][c-1]===1){const k=`v-${r}-${c}`;if(!vis.has(k)){vis.add(k);ekid[k]=ec++;}}
+  }
+  const cr={};
+  for(let r=0;r<gs;r++)for(let c=0;c<gs;c++){
+    if(mat[r][c]!==1)continue;
+    const edges=[];
+    if(r>0&&mat[r-1][c]===1)edges.push(ekid[`h-${r}-${c}`]);
+    if(r<gs-1&&mat[r+1][c]===1)edges.push(ekid[`h-${r+1}-${c}`]);
+    if(c>0&&mat[r][c-1]===1)edges.push(ekid[`v-${r}-${c}`]);
+    if(c<gs-1&&mat[r][c+1]===1)edges.push(ekid[`v-${r}-${c+1}`]);
+    if(edges.length)cr[cn[r][c]]={edges};
+  }
+  const de={};
+  for(const[k,id] of Object.entries(ekid)){
+    const[tp,rs,cs]=k.split('-');const r=+rs,c=+cs;const cells=[];
+    if(tp==='h'){if(r>0&&mat[r-1][c]===1)cells.push(cn[r-1][c]);if(mat[r][c]===1)cells.push(cn[r][c]);}
+    else{if(c>0&&mat[r][c-1]===1)cells.push(cn[r][c-1]);if(mat[r][c]===1)cells.push(cn[r][c]);}
+    de[id]=cells;
+  }
+  return{cn,cr,de};
+}
+function cellCoords(cn2D,num,gs){
+  for(let r=0;r<gs;r++)for(let c=0;c<gs;c++)if(cn2D[r][c]===num)return{r,c};
+  return null;
+}
+function checkCaptures(eid,de,cr,eo,board,cn2D,gs){
+  const out=[];const id=+eid;
+  for(const num of(de[id]||[])){
+    const req=cr[num];
+    if(req&&req.edges.every(x=>eo.hasOwnProperty(x.toString()))){
+      const pos=cellCoords(cn2D,num,gs);
+      if(pos&&board[pos.r][pos.c]===-1)out.push(pos);
+    }
+  }
+  return out;
+}
+
+const SHAPES=['circle','square','x','triangle'];
+const COLORS=['#ef4444','#10b981','#3b82f6','#f59e0b'];
+const COLORS_DARK=['#b91c1c','#065f46','#1e40af','#92400e'];
+
+function pieceSVG(pidx,size){
+  size=size||40;const c=COLORS[pidx],d=COLORS_DARK[pidx];
+  const id='g'+Math.random().toString(36).slice(2,6);
+  switch(SHAPES[pidx]){
+    case'circle':return`<svg viewBox="0 0 ${size} ${size}"><defs><radialGradient id="${id}"><stop offset="0%" stop-color="${c}"/><stop offset="100%" stop-color="${d}"/></radialGradient></defs><circle cx="${size/2}" cy="${size/2}" r="${size/2-3}" fill="url(#${id})" stroke="rgba(255,255,255,.25)" stroke-width="2"/></svg>`;
+    case'square':return`<svg viewBox="0 0 ${size} ${size}"><defs><radialGradient id="${id}"><stop offset="0%" stop-color="${c}"/><stop offset="100%" stop-color="${d}"/></radialGradient></defs><rect x="4" y="4" width="${size-8}" height="${size-8}" rx="5" fill="url(#${id})" stroke="rgba(255,255,255,.25)" stroke-width="2"/></svg>`;
+    case'x':return`<svg viewBox="0 0 ${size} ${size}"><line x1="${size*.2}" y1="${size*.2}" x2="${size*.8}" y2="${size*.8}" stroke="${c}" stroke-width="7" stroke-linecap="round"/><line x1="${size*.8}" y1="${size*.2}" x2="${size*.2}" y2="${size*.8}" stroke="${c}" stroke-width="7" stroke-linecap="round"/></svg>`;
+    case'triangle':return`<svg viewBox="0 0 ${size} ${size}"><polygon points="${size/2},4 ${size-4},${size-4} 4,${size-4}" fill="${c}" stroke="rgba(255,255,255,.2)" stroke-width="2"/></svg>`;
+  }
+}
+
+function renderPieces(piecesEl,board,mat,gs,cs,owner){
+  const cells=piecesEl.children;
+  for(let r=0;r<gs;r++)for(let c=0;c<gs;c++){
+    const cell=cells[r*gs+c];if(!cell)continue;
+    const v=board[r][c];
+    if(v!=null&&v!==-1)cell.innerHTML=`<div class="piece-svg">${pieceSVG(owner[v],Math.round(cs*.78))}</div>`;
+    else cell.innerHTML='';
+  }
+}
+
+function buildBoard(edgesEl,piecesEl,mat,gs,cs,lt,onEdgeClick){
+  edgesEl.innerHTML='';piecesEl.innerHTML='';
+  const bw=edgesEl.parentElement;
+  bw.style.width=(gs*cs)+'px';bw.style.height=(gs*cs)+'px';
+  piecesEl.style.gridTemplateColumns=`repeat(${gs},${cs}px)`;
+  piecesEl.style.gridTemplateRows=`repeat(${gs},${cs}px)`;
+  const edges=[];let ec=0;
+  for(let r=0;r<gs;r++)for(let c=0;c<gs;c++){
+    if(mat[r][c]!==1)continue;
+    if(r>0&&mat[r-1][c]===1)mkEdge(edgesEl,r,c,'h','top','inner',cs,lt,ec++,edges,onEdgeClick);
+    if(c>0&&mat[r][c-1]===1)mkEdge(edgesEl,r,c,'v','left','inner',cs,lt,ec++,edges,onEdgeClick);
+  }
+  for(let r=0;r<gs;r++)for(let c=0;c<gs;c++){
+    if(mat[r][c]!==1)continue;
+    if(r===0||mat[r-1][c]!==1)mkEdge(edgesEl,r,c,'h','top','outer',cs,lt,null,null,null);
+    if(r===gs-1||mat[r+1][c]!==1)mkEdge(edgesEl,r,c,'h','bottom','outer',cs,lt,null,null,null);
+    if(c===0||mat[r][c-1]!==1)mkEdge(edgesEl,r,c,'v','left','outer',cs,lt,null,null,null);
+    if(c===gs-1||mat[r][c+1]!==1)mkEdge(edgesEl,r,c,'v','right','outer',cs,lt,null,null,null);
+  }
+  for(let r=0;r<gs;r++)for(let c=0;c<gs;c++){
+    const d=document.createElement('div');d.className='piece-cell';
+    if(mat[r][c]===0)d.style.visibility='hidden';
+    piecesEl.appendChild(d);
+  }
+  return edges;
+}
+
+function mkEdge(el,r,c,tp,pos,kind,cs,lt,eid,edgesArr,onClick){
+  const e=document.createElement('div');
+  const vt=kind==='inner'?Math.max(10,lt):lt;
+  e.classList.add('edge',kind==='inner'?'edge-inner':'edge-outer');
+  e.style.position='absolute';
+  if(tp==='h'){
+    e.style.width=(cs+vt)+'px';e.style.height=vt+'px';
+    e.style.left=(c*cs-vt/2)+'px';
+    e.style.top=(pos==='top'?r*cs:(r+1)*cs)-vt/2+'px';
+  } else {
+    e.style.width=vt+'px';e.style.height=(cs+vt)+'px';
+    e.style.left=(pos==='left'?c*cs:(c+1)*cs)-vt/2+'px';
+    e.style.top=(r*cs-vt/2)+'px';
+  }
+  if(kind==='inner'){
+    e.dataset.eid=eid;
+    e.addEventListener('click',()=>onClick(e,eid));
+    edgesArr.push(e);
+  }
+  el.appendChild(e);
+}
+
+function getCS(containerEl,gs){
+  const w=containerEl.clientWidth-32;
+  const h=Math.min(innerHeight*.55,innerWidth*.85);
+  return Math.max(38,Math.min(72,Math.floor(Math.min(w,h)/gs)));
+}
+
+/* ═══════════════════ MODE SWITCH ═══════════════════ */
+let curMode='ai';
+
+function stopAIGame(){
+  aiActive=false;
+  aiTurnLocked=true;
+  clearInterval(aiTimerInt);
+  aiTimerInt=null;
+}
+
+function setMode(m){
+  if(m===curMode)return;
+  curMode=m;
+  document.getElementById('tab-ai').className='bnav-btn'+(m==='ai'?' on':'');
+  document.getElementById('tab-fr').className='bnav-btn'+(m==='fr'?' on':'');
+  document.getElementById('ai-section').style.display=m==='ai'?'flex':'none';
+  document.getElementById('fr-section').style.display=m==='fr'?'block':'none';
+
+  if(m==='fr'){
+    stopAIGame();
+  } else if(m==='ai'){
+    setTimeout(aiNewGame,50);
+  }
+}
+
+/* ═══════════════════ WIN MODAL ═══════════════════ */
+let _winCb=null;
+function showWin(icon,title,sub,players,retryCb){
+  _winCb=retryCb;
+  document.getElementById('win-icon').textContent=icon;
+  document.getElementById('win-title').textContent=title;
+  document.getElementById('win-sub').textContent=sub;
+  const sc=document.getElementById('win-scores');
+  sc.style.gridTemplateColumns=`repeat(${Math.min(players.length,2)},1fr)`;
+  sc.innerHTML=players.map(p=>`<div class="win-score-card"><div class="win-score-name">${p.name}</div><div class="win-score-val" style="color:${COLORS[p.pidx]}">${p.score}</div></div>`).join('');
+  document.getElementById('win-retry-btn').onclick=()=>{closeWin();if(_winCb)_winCb();};
+  document.getElementById('win-modal').classList.add('show');
+}
+function closeWin(){document.getElementById('win-modal').classList.remove('show');}
+
+/* ═══════════════════ AI GAME ═══════════════════ */
+const GEMINI_KEY='AIzaSyBcfAKyRVaqx5qF_ig38qUx29GJAthspdc';
+const GEMINI_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY;
+
+let aiBoard=[],aiEO={},aiEdges=[],aiActive=false;
+let aiData={cn:null,cr:null,de:null};
+let aiTurn=0; // 0=AI, 1=You
+let aiScores=[0,0];
+let aiCS=55,aiLT=10;
+let aiTimerInt=null,aiTimeLeft=5;
+let aiTurnLocked=false;
+
+let aiSessionId=0;
+
+function aiInitBoard(){
+  aiBoard=DIAMOND.map(r=>r.map(v=>v===1?-1:null));
+  aiEO={};aiScores=[0,0];
+}
+function aiCountScores(){
+  aiScores=[0,0];
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){
+    const v=aiBoard[r][c];
+    if(v===0)aiScores[0]++;
+    else if(v===1)aiScores[1]++;
+  }
+}
+function aiUpdateScoreUI(){
+  aiCountScores();
+  document.getElementById('ai-score-ai').textContent=aiScores[0];
+  document.getElementById('ai-score-you').textContent=aiScores[1];
+  const total=DIAMOND.flat().filter(x=>x===1).length;
+  document.getElementById('ai-cells-left').textContent=total-aiScores[0]-aiScores[1];
+}
+function aiRenderPieces(){
+  renderPieces(document.getElementById('ai-pieces'),aiBoard,DIAMOND,GS,aiCS,[0,1]);
+}
+function aiUpdateTurn(){
+  const names=['🤖 AI','👤 You'];
+  const colors=[COLORS[0],COLORS[1]];
+  document.getElementById('ai-turn-dot').style.background=colors[aiTurn];
+  document.getElementById('ai-turn-name').textContent=names[aiTurn]+"'s Turn";
+  const st=document.getElementById('ai-status');
+  if(aiTurn===0){
+    st.className='ai-status';
+    document.getElementById('ai-status-text').textContent='AI is thinking...';
+  } else {
+    st.className='ai-status idle';
+    document.getElementById('ai-status-text').textContent='Your turn — click an edge!';
+  }
+}
+
+function aiStartHumanTimer(){
+  clearInterval(aiTimerInt);
+  aiTimeLeft=5;
+  const bar=document.getElementById('ai-timer-bar');
+  bar.style.width='100%';bar.className='timer-bar';
+  document.getElementById('ai-turn-timer').textContent='5s';
+
+  aiTimerInt=setInterval(()=>{
+    if(!aiActive){clearInterval(aiTimerInt);return;}
+    aiTimeLeft=Math.max(0,aiTimeLeft-.1);
+    const pct=(aiTimeLeft/5)*100;
+    bar.style.width=pct+'%';
+    document.getElementById('ai-turn-timer').textContent=Math.ceil(aiTimeLeft)+'s';
+    if(pct<40)bar.className='timer-bar warn';
+    if(pct<20)bar.className='timer-bar urgent';
+    if(aiTimeLeft<=0){
+      clearInterval(aiTimerInt);
+      if(!aiActive)return;
+      aiTurn=0;
+      aiUpdateTurn();
+      setTimeout(aiDoAITurn,200);
+    }
+  },100);
+}
+
+async function aiAskGemini(){
+  const takenEdges=Object.keys(aiEO).map(Number);
+  const avEdges=aiEdges.map(e=>+e.dataset.eid).filter(id=>!aiEO.hasOwnProperty(id.toString()));
+  const prompt=`You are playing a strategic board game called "Dots and Diamonds".
+The board has cells numbered by their ID. You must pick ONE edge ID from the available edges list.
+
+Current board state:
+- Edges already taken: [${takenEdges.join(',')}]
+- Your available edges to pick from: [${avEdges.join(',')}]
+- Your score: ${aiScores[0]} cells
+- Opponent score: ${aiScores[1]} cells
+
+Strategy: prefer edges that complete a cell (all other edges of that cell are taken). Avoid edges that give the opponent an easy capture.
+
+Respond with ONLY a single number — the edge ID you choose. Nothing else.`;
+
+  try{
+    const resp=await fetch(GEMINI_URL,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.2,maxOutputTokens:20}})
+    });
+    if(!resp.ok)throw new Error('API error');
+    const data=await resp.json();
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'';
+    const picked=parseInt(text.match(/\d+/)?.[0]||'-1');
+    if(avEdges.includes(picked))return picked;
+  }catch(err){console.warn('Gemini error:',err);}
+  return aiBestEdge(avEdges);
+}
+
+function aiBestEdge(avEdges){
+  for(const id of avEdges){
+    for(const num of(aiData.de[id]||[])){
+      const req=aiData.cr[num];
+      if(req&&req.edges.filter(x=>x!==id&&!aiEO.hasOwnProperty(x.toString())).length===0)return id;
+    }
+  }
+  const safe=avEdges.filter(id=>{
+    for(const num of(aiData.de[id]||[])){
+      const req=aiData.cr[num];
+      if(req&&req.edges.filter(x=>aiEO.hasOwnProperty(x.toString())).length===2)return false;
+    }
+    return true;
+  });
+  const pool=safe.length?safe:avEdges;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+async function aiDoAITurn(){
+  const mySession=aiSessionId;
+  if(!aiActive||aiTurn!==0)return;
+
+  aiTurnLocked=true;
+  document.getElementById('ai-status').className='ai-status';
+  document.getElementById('ai-status-text').textContent='🤖 AI is thinking via Gemini...';
+
+  let aiTurnTimedOut=false;
+  let aiTurnTimeLeft=5;
+  const bar=document.getElementById('ai-timer-bar');
+  bar.style.width='100%';bar.className='timer-bar';
+  document.getElementById('ai-turn-timer').textContent='5s';
+
+  clearInterval(aiTimerInt);
+  aiTimerInt=setInterval(()=>{
+    if(!aiActive||aiSessionId!==mySession){clearInterval(aiTimerInt);return;}
+    aiTurnTimeLeft=Math.max(0,aiTurnTimeLeft-.1);
+    const pct=(aiTurnTimeLeft/5)*100;
+    bar.style.width=pct+'%';
+    document.getElementById('ai-turn-timer').textContent=Math.ceil(aiTurnTimeLeft)+'s';
+    if(pct<40)bar.className='timer-bar warn';
+    if(pct<20)bar.className='timer-bar urgent';
+    if(aiTurnTimeLeft<=0){
+      aiTurnTimedOut=true;
+      clearInterval(aiTimerInt);
+    }
+  },100);
+
+  await new Promise(r=>setTimeout(r,400));
+
+  const eid=await aiAskGemini();
+
+  clearInterval(aiTimerInt);
+  if(aiSessionId!==mySession){aiTurnLocked=false;return;}
+  if(!aiActive){aiTurnLocked=false;return;}
+
+  if(aiTurnTimedOut){
+    aiTurnLocked=false;
+    aiTurn=1;
+    aiUpdateTurn();
+    aiStartHumanTimer();
+    return;
+  }
+
+  const edge=aiEdges.find(e=>+e.dataset.eid===eid);
+  if(edge){
+    edge.classList.add('ai-thinking');
+    await new Promise(r=>setTimeout(r,300));
+    edge.classList.remove('ai-thinking');
+    if(aiSessionId===mySession&&aiActive)aiDoMove(edge,eid);
+  } else {
+    const fb=aiBestEdge(aiEdges.map(e=>+e.dataset.eid).filter(id=>!aiEO.hasOwnProperty(id.toString())));
+    if(fb!=null){
+      const fe=aiEdges.find(e=>+e.dataset.eid===fb);
+      if(fe&&aiSessionId===mySession&&aiActive)aiDoMove(fe,fb);
+    }
+  }
+  aiTurnLocked=false;
+}
+
+function aiDoMove(edge,eid){
+  if(!aiActive)return;
+  clearInterval(aiTimerInt);
+  const pidx=aiTurn;
+  edge.style.background=COLORS[pidx];
+  edge.style.boxShadow=`0 0 8px ${COLORS[pidx]}60`;
+  edge.classList.add('taken');
+  aiEO[eid.toString()]=pidx;
+  const caps=checkCaptures(eid,aiData.de,aiData.cr,aiEO,aiBoard,aiData.cn,GS);
+  caps.forEach(p=>{
+    aiBoard[p.r][p.c]=pidx;
+    const rect=document.getElementById('ai-board-inner').getBoundingClientRect();
+    burst(rect.left+(p.c+.5)*aiCS,rect.top+(p.r+.5)*aiCS,COLORS[pidx]);
+  });
+  aiUpdateScoreUI();aiRenderPieces();
+  const rem=aiEdges.some(e=>!aiEO.hasOwnProperty(e.dataset.eid));
+  if(!rem){aiEndGame();return;}
+  aiTurn=(aiTurn+1)%2;
+  aiUpdateTurn();
+  if(aiTurn===1){
+    aiStartHumanTimer();
+  } else {
+    setTimeout(aiDoAITurn,200);
+  }
+}
+
+function aiEndGame(){
+  aiActive=false;clearInterval(aiTimerInt);
+  aiCountScores();
+  const youWin=aiScores[1]>aiScores[0];
+  const tie=aiScores[1]===aiScores[0];
+  showWin(
+    youWin?'🎉':tie?'🤝':'😔',
+    youWin?'You Win!':tie?"It's a Tie!":'AI Wins!',
+    'Final Scores',
+    [{name:'🤖 AI',pidx:0,score:aiScores[0]},{name:'👤 You',pidx:1,score:aiScores[1]}],
+    aiNewGame
+  );
+}
+
+function aiNewGame(){
+  aiSessionId++;
+  clearInterval(aiTimerInt);
+  aiTurnLocked=false;
+  aiInitBoard();aiEO={};aiEdges=[];
+  aiData=buildBoardData(DIAMOND,GS);
+  aiCS=getCS(document.getElementById('ai-board-inner').parentElement,GS);
+  aiLT=Math.max(8,Math.round(aiCS/6));
+  aiEdges=buildBoard(
+    document.getElementById('ai-edges'),
+    document.getElementById('ai-pieces'),
+    DIAMOND,GS,aiCS,aiLT,
+    (edge,eid)=>{
+      if(!aiActive||aiTurn!==1||aiEO.hasOwnProperty(eid.toString())||aiTurnLocked)return;
+      clearInterval(aiTimerInt);
+      aiDoMove(edge,+eid);
+    }
+  );
+  aiTurn=1;
+  aiActive=true;
+  aiUpdateTurn();aiUpdateScoreUI();aiRenderPieces();
+  document.getElementById('ai-status').className='ai-status idle';
+  document.getElementById('ai-status-text').textContent='Your turn — click an edge!';
+  aiStartHumanTimer();
+}
+
+/* ═══════════════════ FRIENDS GAME ═══════════════════ */
+let frPC=4,frUseTimer=false;
+let frBoard=[],frEO={},frEdges=[],frActive=false;
+let frData={cn:null,cr:null,de:null};
+let frTurn=0,frScores=[];
+let frCS=55,frLT=10;
+let frTimerInt=null,frTimeLeft=5;
+const FR_NAMES=['Player 1','Player 2','Player 3','Player 4'];
+
+function frSetPC(n){
+  frPC=n;
+  document.querySelectorAll('[onclick^="frSetPC"]').forEach((b,i)=>{b.classList.toggle('on',[2,3,4][i]===n);});
+  frRenderSetupList();
+}
+function frSetTimer(on){
+  frUseTimer=on;
+  document.getElementById('timer-off-btn').classList.toggle('on',!on);
+  document.getElementById('timer-on-btn').classList.toggle('on',on);
+}
+function frRenderSetupList(){
+  document.getElementById('fr-player-list').innerHTML=Array.from({length:frPC},(_,i)=>`
+    <div class="ps-row">
+      <div class="ps-dot" style="background:${COLORS[i]}"></div>
+      <div class="ps-name" style="color:${COLORS[i]}">${FR_NAMES[i]}</div>
+      <div style="font-size:12px;color:var(--muted);">${SHAPES[i]}</div>
+    </div>`).join('');
+}
+function frInitBoard(){frBoard=DIAMOND.map(r=>r.map(v=>v===1?-1:null));frEO={};frScores=Array(frPC).fill(0);}
+function frCountScores(){
+  frScores=Array(frPC).fill(0);
+  for(let r=0;r<GS;r++)for(let c=0;c<GS;c++){const v=frBoard[r][c];if(v!=null&&v!==-1&&v<frPC)frScores[v]++;}
+}
+function frRenderPieces(){
+  renderPieces(document.getElementById('fr-pieces'),frBoard,DIAMOND,GS,frCS,Array.from({length:frPC},(_,i)=>i));
+}
+function frRenderPlayers(){
+  document.getElementById('fr-players-panel').innerHTML=Array.from({length:frPC},(_,i)=>`
+    <div class="player-card${i===frTurn?' active':''}" style="color:${COLORS[i]}" id="pc-${i}">
+      <div class="player-dot" style="background:${COLORS[i]}"></div>
+      <span class="player-name">${FR_NAMES[i]}</span>
+      <span class="player-score" style="color:${COLORS[i]}">${frScores[i]}</span>
+    </div>`).join('');
+}
+function frUpdateTurn(){
+  document.getElementById('fr-turn-dot').style.background=COLORS[frTurn];
+  document.getElementById('fr-turn-name').textContent=FR_NAMES[frTurn]+"'s Turn";
+  frRenderPlayers();
+}
+function frStartTimer(){
+  if(!frUseTimer)return;
+  clearInterval(frTimerInt);frTimeLeft=5;
+  document.getElementById('fr-timer-bar').style.width='100%';
+  document.getElementById('fr-timer-bar').className='timer-bar';
+  document.getElementById('fr-turn-timer').textContent='5s';
+  frTimerInt=setInterval(()=>{
+    frTimeLeft=Math.max(0,frTimeLeft-.1);
+    const pct=(frTimeLeft/5)*100;
+    const bar=document.getElementById('fr-timer-bar');
+    bar.style.width=pct+'%';
+    document.getElementById('fr-turn-timer').textContent=Math.ceil(frTimeLeft)+'s';
+    if(pct<40)bar.className='timer-bar warn';
+    if(pct<20)bar.className='timer-bar urgent';
+    if(frTimeLeft<=0){clearInterval(frTimerInt);frSkipTurn();}
+  },100);
+}
+function frSkipTurn(){
+  if(!frActive)return;
+  const rem=frEdges.some(e=>!frEO.hasOwnProperty(e.dataset.eid));
+  if(!rem){frEndGame();return;}
+  const ind=document.getElementById('fr-turn-dot');
+  ind.style.opacity='0.3';
+  setTimeout(()=>{ind.style.opacity='1';},300);
+  frTurn=(frTurn+1)%frPC;
+  frUpdateTurn();frStartTimer();
+}
+function frDoMove(edge,eid){
+  if(!frActive)return;
+  clearInterval(frTimerInt);
+  edge.style.background=COLORS[frTurn];
+  edge.style.boxShadow=`0 0 8px ${COLORS[frTurn]}60`;
+  edge.classList.add('taken');
+  frEO[eid.toString()]=frTurn;
+  const caps=checkCaptures(eid,frData.de,frData.cr,frEO,frBoard,frData.cn,GS);
+  caps.forEach(p=>{
+    frBoard[p.r][p.c]=frTurn;
+    const rect=document.getElementById('fr-board-inner').getBoundingClientRect();
+    burst(rect.left+(p.c+.5)*frCS,rect.top+(p.r+.5)*frCS,COLORS[frTurn]);
+  });
+  frCountScores();frRenderPieces();
+  const rem=frEdges.some(e=>!frEO.hasOwnProperty(e.dataset.eid));
+  if(!rem){frEndGame();return;}
+  frTurn=(frTurn+1)%frPC;
+  frUpdateTurn();frStartTimer();
+}
+function frEndGame(){
+  frActive=false;clearInterval(frTimerInt);frCountScores();
+  const mx=Math.max(...frScores);
+  const winners=frScores.map((s,i)=>s===mx?FR_NAMES[i]:null).filter(Boolean);
+  showWin(
+    winners.length===1?'🏆':'🤝',
+    winners.length===1?`${winners[0]} Wins!`:"It's a Tie!",
+    'Final Scores',
+    Array.from({length:frPC},(_,i)=>({name:FR_NAMES[i],pidx:i,score:frScores[i]})),
+    frNewRound
+  );
+}
+function frBuildGame(){
+  frData=buildBoardData(DIAMOND,GS);
+  frCS=getCS(document.getElementById('fr-board-inner').parentElement,GS);
+  frLT=Math.max(8,Math.round(frCS/6));
+  frEdges=buildBoard(
+    document.getElementById('fr-edges'),
+    document.getElementById('fr-pieces'),
+    DIAMOND,GS,frCS,frLT,
+    (edge,eid)=>{
+      if(!frActive||frEO.hasOwnProperty(eid.toString()))return;
+      clearInterval(frTimerInt);
+      frDoMove(edge,+eid);
+    }
+  );
+  frTurn=0;frActive=true;frScores=Array(frPC).fill(0);
+  frUpdateTurn();frRenderPieces();
+  if(frUseTimer){
+    document.getElementById('fr-turn-timer').style.display='block';
+    document.getElementById('fr-timer-wrap').style.display='block';
+    frStartTimer();
+  } else {
+    document.getElementById('fr-turn-timer').style.display='none';
+    document.getElementById('fr-timer-wrap').style.display='none';
+  }
+}
+function frStart(){
+  document.getElementById('fr-setup').style.display='none';
+  document.getElementById('fr-game').style.display='flex';
+  frInitBoard();frBuildGame();
+}
+function frNewRound(){
+  clearInterval(frTimerInt);frInitBoard();
+  frEdges.forEach(e=>{e.style.background='';e.style.boxShadow='';e.classList.remove('taken');});
+  frTurn=0;frActive=true;frScores=Array(frPC).fill(0);
+  frCountScores();frRenderPieces();frUpdateTurn();
+  if(frUseTimer)frStartTimer();
+}
+function frBackSetup(){
+  clearInterval(frTimerInt);frActive=false;
+  document.getElementById('fr-game').style.display='none';
+  document.getElementById('fr-setup').style.display='block';
+}
+
+/* ═══ INIT ═══ */
+frRenderSetupList();
+frSetPC(4);
+setTimeout(aiNewGame,100);
+
+window.addEventListener('resize',()=>{
+  if(curMode==='ai'){
+    const newCS=getCS(document.getElementById('ai-board-inner').parentElement,GS);
+    if(Math.abs(newCS-aiCS)>4)aiNewGame();
+  }
+});
+</script>
+</body>
+</html>
